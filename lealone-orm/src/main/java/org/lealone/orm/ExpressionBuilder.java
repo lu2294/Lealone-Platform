@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.lealone.common.util.New;
-import org.lealone.db.result.SelectOrderBy;
 import org.lealone.db.value.Value;
 import org.lealone.db.value.ValueString;
 import org.lealone.sql.expression.CompareLike;
@@ -29,6 +28,7 @@ import org.lealone.sql.expression.Comparison;
 import org.lealone.sql.expression.ConditionAndOr;
 import org.lealone.sql.expression.Expression;
 import org.lealone.sql.expression.ExpressionColumn;
+import org.lealone.sql.expression.SelectOrderBy;
 import org.lealone.sql.expression.ValueExpression;
 
 public class ExpressionBuilder<T> {
