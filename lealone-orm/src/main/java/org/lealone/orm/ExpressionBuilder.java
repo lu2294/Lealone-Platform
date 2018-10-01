@@ -20,7 +20,6 @@ package org.lealone.orm;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.lealone.common.util.New;
 import org.lealone.db.value.Value;
 import org.lealone.db.value.ValueString;
 import org.lealone.sql.expression.CompareLike;
@@ -275,7 +274,7 @@ public class ExpressionBuilder<T> {
 
     public ExpressionBuilder<T> orderBy(String propertyName, boolean isDesc) {
         if (orderList == null)
-            orderList = New.arrayList();
+            orderList = new ArrayList<>();
         SelectOrderBy order = new SelectOrderBy();
         order.expression = model.getExpressionColumn(propertyName);
         order.descending = isDesc;

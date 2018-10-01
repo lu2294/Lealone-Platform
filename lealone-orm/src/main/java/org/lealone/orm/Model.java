@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentSkipListMap;
 
 import org.lealone.common.logging.Logger;
 import org.lealone.common.logging.LoggerFactory;
-import org.lealone.common.util.New;
 import org.lealone.db.ServerSession;
 import org.lealone.db.index.Index;
 import org.lealone.db.result.Result;
@@ -273,7 +272,7 @@ public abstract class Model<T> {
 
     private ArrayList<Expression> getSelectExpressions() {
         if (selectExpressions == null) {
-            selectExpressions = New.arrayList();
+            selectExpressions = new ArrayList<>();
         }
         return selectExpressions;
     }
