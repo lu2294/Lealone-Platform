@@ -17,11 +17,9 @@
  */
 package org.lealone.vertx.net;
 
-import java.net.BindException;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import org.lealone.common.exceptions.ConfigException;
 import org.lealone.common.exceptions.DbException;
 import org.lealone.common.logging.Logger;
 import org.lealone.common.logging.LoggerFactory;
@@ -119,18 +117,7 @@ public class VertxNetServer extends NetServerBase {
                 logger.info("MessagingService listening on port " + server.actualPort());
             } else {
                 Throwable e = res.cause();
-                String address = host + ":" + port;
-                if (e instanceof BindException) {
-                    if (e.getMessage().contains("in use"))
-                        throw new ConfigException(
-                                address + " is in use by another process. Change host:port in lealone.yaml "
-                                        + "to values that do not conflict with other services");
-                    else if (e.getMessage().contains("Cannot assign requested address"))
-                        throw new ConfigException("Unable to bind to address " + address
-                                + ". Set host:port in lealone.yaml to an interface you can bind to, e.g.,"
-                                + " your private IP address");
-                }
-                throw DbException.convert(e);
+                checkBindException(e, "Failed to start vertx net server");
             }
         });
 
