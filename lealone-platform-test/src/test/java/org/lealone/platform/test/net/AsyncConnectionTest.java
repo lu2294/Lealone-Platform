@@ -18,7 +18,7 @@
 package org.lealone.platform.test.net;
 
 import org.lealone.net.AsyncConnection;
-import org.lealone.net.TcpConnection;
+import org.lealone.server.TcpServerConnection;
 import org.lealone.vertx.net.VertxBuffer;
 
 import io.vertx.core.buffer.Buffer;
@@ -30,7 +30,7 @@ public class AsyncConnectionTest {
     }
 
     public static void main(String[] args) {
-        AsyncConnection c = new TcpConnection(null, false);
+        AsyncConnection c = new TcpServerConnection(null, false);
         Buffer b = Buffer.buffer();
         b.appendInt(8); // packetLength
         b.appendInt(1);

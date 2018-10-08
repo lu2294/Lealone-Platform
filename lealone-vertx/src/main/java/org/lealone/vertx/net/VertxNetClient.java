@@ -26,7 +26,7 @@ import org.lealone.common.exceptions.DbException;
 import org.lealone.net.AsyncConnection;
 import org.lealone.net.AsyncConnectionManager;
 import org.lealone.net.NetEndpoint;
-import org.lealone.net.TcpConnection;
+import org.lealone.net.TcpClientConnection;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.net.NetClient;
@@ -91,7 +91,7 @@ public class VertxNetClient implements org.lealone.net.NetClient {
                                 if (connectionManager != null) {
                                     conn = connectionManager.createConnection(channel, false);
                                 } else {
-                                    conn = new TcpConnection(channel, this);
+                                    conn = new TcpClientConnection(channel, this);
                                 }
                                 conn.setInetSocketAddress(inetSocketAddress);
                                 asyncConnections.put(inetSocketAddress, conn);
