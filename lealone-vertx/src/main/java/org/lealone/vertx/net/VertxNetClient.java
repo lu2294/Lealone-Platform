@@ -19,12 +19,12 @@ package org.lealone.vertx.net;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 import org.lealone.common.exceptions.DbException;
 import org.lealone.net.AsyncConnection;
 import org.lealone.net.AsyncConnectionManager;
+import org.lealone.net.NetClientBase;
 import org.lealone.net.NetEndpoint;
 import org.lealone.net.TcpClientConnection;
 
@@ -33,95 +33,65 @@ import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetSocket;
 
-public class VertxNetClient implements org.lealone.net.NetClient {
-
-    // 使用InetSocketAddress为key而不是字符串，是因为像localhost和127.0.0.1这两种不同格式实际都是同一个意思，
-    // 如果用字符串，就会产生两条AsyncConnection，这是没必要的。
-    private static final ConcurrentHashMap<InetSocketAddress, AsyncConnection> asyncConnections = new ConcurrentHashMap<>();
+public class VertxNetClient extends NetClientBase {
 
     private static Vertx vertx;
-    private static NetClient client;
+    private static NetClient vertxClient;
 
-    private static void openClient(Map<String, String> config) {
-        synchronized (VertxNetClient.class) {
-            if (client == null) {
-                vertx = VertxNetUtils.getVertx(config);
-                NetClientOptions options = VertxNetUtils.getNetClientOptions(config);
-                options.setConnectTimeout(10000);
-                client = vertx.createNetClient(options);
-            }
+    private static synchronized void openVertxClient(Map<String, String> config) {
+        if (vertxClient == null) {
+            vertx = VertxNetUtils.getVertx(config);
+            NetClientOptions options = VertxNetUtils.getNetClientOptions(config);
+            options.setConnectTimeout(10000);
+            vertxClient = vertx.createNetClient(options);
         }
     }
 
-    private static void closeClient() {
-        synchronized (VertxNetClient.class) {
-            if (client != null) {
-                client.close();
-                VertxNetUtils.closeVertx(vertx); // 不要像这样单独调用: vertx.close();
-                client = null;
-                vertx = null;
-            }
+    private static synchronized void closeVertxClient() {
+        if (vertxClient != null) {
+            vertxClient.close();
+            VertxNetUtils.closeVertx(vertx); // 不要像这样单独调用: vertx.close();
+            vertxClient = null;
+            vertx = null;
         }
     }
 
     @Override
-    public AsyncConnection createConnection(Map<String, String> config, NetEndpoint endpoint) {
-        return createConnection(config, endpoint, null);
+    protected void openInternal(Map<String, String> config) {
+        openVertxClient(config);
     }
 
     @Override
-    public AsyncConnection createConnection(Map<String, String> config, NetEndpoint endpoint,
-            AsyncConnectionManager connectionManager) {
-        if (client == null) {
-            openClient(config);
-        }
+    protected void closeInternal() {
+        closeVertxClient();
+    }
+
+    @Override
+    protected void createConnectionInternal(NetEndpoint endpoint, AsyncConnectionManager connectionManager,
+            CountDownLatch latch) throws Exception {
         InetSocketAddress inetSocketAddress = endpoint.getInetSocketAddress();
-        AsyncConnection asyncConnection = asyncConnections.get(inetSocketAddress);
-        if (asyncConnection == null) {
-            synchronized (VertxNetClient.class) {
-                asyncConnection = asyncConnections.get(inetSocketAddress);
-                if (asyncConnection == null) {
-                    CountDownLatch latch = new CountDownLatch(1);
-                    client.connect(endpoint.getPort(), endpoint.getHost(), res -> {
-                        try {
-                            if (res.succeeded()) {
-                                NetSocket socket = res.result();
-                                VertxWritableChannel channel = new VertxWritableChannel(socket);
-                                AsyncConnection conn;
-                                if (connectionManager != null) {
-                                    conn = connectionManager.createConnection(channel, false);
-                                } else {
-                                    conn = new TcpClientConnection(channel, this);
-                                }
-                                conn.setInetSocketAddress(inetSocketAddress);
-                                asyncConnections.put(inetSocketAddress, conn);
-                                socket.handler(buffer -> {
-                                    conn.handle(new VertxBuffer(buffer));
-                                });
-                            } else {
-                                throw DbException.convert(res.cause());
-                            }
-                        } finally {
-                            latch.countDown();
-                        }
-                    });
-                    try {
-                        latch.await();
-                        asyncConnection = asyncConnections.get(inetSocketAddress);
-                    } catch (InterruptedException e) {
-                        throw DbException.convert(e);
+        vertxClient.connect(endpoint.getPort(), endpoint.getHost(), res -> {
+            try {
+                if (res.succeeded()) {
+                    NetSocket socket = res.result();
+                    VertxWritableChannel channel = new VertxWritableChannel(socket);
+                    AsyncConnection conn;
+                    if (connectionManager != null) {
+                        conn = connectionManager.createConnection(channel, false);
+                    } else {
+                        conn = new TcpClientConnection(channel, this);
                     }
+                    conn.setInetSocketAddress(inetSocketAddress);
+                    addConnection(inetSocketAddress, conn);
+                    socket.handler(buffer -> {
+                        conn.handle(new VertxBuffer(buffer));
+                    });
+                } else {
+                    throw DbException.convert(res.cause());
                 }
+            } finally {
+                latch.countDown();
             }
-        }
-        return asyncConnection;
-    }
-
-    @Override
-    public void removeConnection(InetSocketAddress inetSocketAddress, boolean closeClient) {
-        asyncConnections.remove(inetSocketAddress);
-        if (closeClient && asyncConnections.isEmpty()) {
-            closeClient();
-        }
+        });
     }
 }
