@@ -26,11 +26,11 @@
     <baseDirectory>/</baseDirectory>
     <fileSets>
         <fileSet>
-            <directory>lealone-platform-dist/bin</directory>
+            <directory>../lealone/lealone-dist/bin</directory>
             <outputDirectory>bin</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>lealone-platform-dist/conf</directory>
+            <directory>../lealone/lealone-dist/conf</directory>
             <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
@@ -55,7 +55,7 @@
             <includes>
                 <include>org.lealone:lealone-main</include>
                 <include>org.lealone:lealone-orm</include>
-                <include>org.lealone:lealone-vertx</include>
+                <include>org.lealone:lealone-service</include>
             </includes><!--
             <binaries>
                 <unpack>false</unpack>

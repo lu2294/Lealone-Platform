@@ -17,9 +17,9 @@
  */
 package org.lealone.platform.test.fullstack;
 
+import org.lealone.platform.service.LealoneHttpServer;
 import org.lealone.platform.test.SqlScript;
 import org.lealone.test.UnitTestBase;
-import org.lealone.vertx.LealoneHttpServer;
 
 public class FrontendOrmTest extends UnitTestBase {
 

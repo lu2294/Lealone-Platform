@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.lealone.vertx;
+package org.lealone.platform.service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

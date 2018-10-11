@@ -17,11 +17,11 @@
  */
 package org.lealone.platform.test.fullstack;
 
+import org.lealone.platform.service.LealoneHttpServer;
 import org.lealone.platform.test.SqlScript;
 import org.lealone.platform.test.service.ServiceConsumer;
 import org.lealone.platform.test.service.ServiceProvider;
 import org.lealone.test.UnitTestBase;
-import org.lealone.vertx.LealoneHttpServer;
 
 public class FullStackTest extends UnitTestBase {
 
