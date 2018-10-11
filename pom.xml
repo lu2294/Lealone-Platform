@@ -38,7 +38,7 @@
         <module>../lealone/lealone-main</module>
         <module>../lealone/lealone-test</module>
         <module>lealone-orm</module>
-        <module>lealone-vertx</module>
+        <module>lealone-service</module>
         <module>lealone-js</module>
         <module>lealone-platform-dist</module>
         <module>lealone-platform-test</module>
